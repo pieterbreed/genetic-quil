@@ -9,7 +9,8 @@
   (let [target-img (q/load-image image-path)
         dest-pixels (q/pixels target-img)
         nr-pixels (count dest-pixels)]
-    [(fn [image]
+    [target-img
+     (fn [image]
        (let [child-pixels (q/pixels image)
              child-nr-pixels (count child-pixels)]
          (when (not= nr-pixels child-nr-pixels)
@@ -23,7 +24,9 @@
 
 (defn setup []
   (q/frame-rate 30)
-  (q/smooth))
+  (q/smooth)
+  (let [res {:fitness-fn (make-fitness-function "C:\\Users\\Pieterbr\\Pictures\\rd_team.jpg" )}]
+    (println (str "hierso: " res))))
 
 (defn make-perc-of-height-fn [height-perc]
   (fn []
@@ -121,26 +124,35 @@
   (let [children-copies (for [_ (range nr-children)]
                           (make-child parent))]))
 
-(defn make-drawer [drawing]
-  (fn []
-    (q/no-stroke)
-    (loop [c (first drawing)
-           nxt (rest drawing)]
-      (when (not (nil? c))
-        (draw-shape c)
-        (recur (first nxt) (rest nxt))))))
+(defn draw-drawing [drawing]
+  (q/no-stroke)
+  (q/background 0)
+  (loop [c (first drawing)
+         nxt (rest drawing)]
+    (when (not (nil? c))
+      (draw-shape c)
+      (recur (first nxt) (rest nxt)))))
 
-(doseq [drawing (loop [counter 0
-                       parent (random-drawing 500)
-                       result []]
-                  (if (<= counter 0) result
-                      (recur (dec counter)
-                             (make-child parent 0.75)
-                             (conj result parent))))]
-  (q/defsketch example
-    :title "Example"
-    :setup setup
-    :draw (make-drawer drawing)
-    :size [200 200]))
+(defn update [state]
+  (assoc state :population (->> state :population (drop 1))))
+
+(defn draw [state]
+  (let [drawing (-> state :population first)]
+    (println (str "hierso: " (count (:population state))))
+    (draw-drawing drawing)))
+
+(defn make-drawing [path population-size nr-shapes]
+  (let [setup-fn (fn []
+                   (q/frame-rate 5)
+                   {:img (q/load-image path)
+                          :population (take 10 (repeatedly #(random-drawing nr-shapes)))})
+        draw-fn draw
+        sketch (q/sketch
+                :title "Image"
+                :setup setup-fn
+                :update update
+                :draw draw-fn
+                :size [901 588]
+                :middleware [m/fun-mode])]))
 
 (defn -main [& args])
