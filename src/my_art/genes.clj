@@ -4,7 +4,7 @@
 
 (defn make-color-gene [& rst]
   {:type :color
-   :data rst})
+   :data (vec rst)})
 
 (defn make-random-color-component []
   (rand-int 255))
@@ -22,7 +22,7 @@
 
 (defn make-triangle-gene [& rst]
   {:type :triangle
-   :data rst})
+   :data (vec rst)})
 
 (defn make-random-coordinate []
   (/ (rand-int 1000) 1000))
