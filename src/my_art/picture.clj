@@ -45,4 +45,7 @@
          (apply map #(java.lang.Math/abs (- %1 %2)))
          (reduce +)
          java.lang.Math/sqrt)))
+
+(defn show [img title]
+  (imagez/show img :title title))
   
